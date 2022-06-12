@@ -4,6 +4,7 @@ import { AnyStyledComponent } from "styled-components";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { Feather } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import { BorderlessButton } from "react-native-gesture-handler";
 
 import { DataListProps } from ".";
 
@@ -37,6 +38,10 @@ export const UserInfo = styled.View`
   flex-direction: row;
   align-items: center;
 `;
+
+export const LogoutButton = styled(
+  BorderlessButton as unknown as AnyStyledComponent
+)``;
 
 export const Icon = styled(Feather as unknown as AnyStyledComponent)`
   color: ${({ theme }) => theme.colors.secondary};
