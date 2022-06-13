@@ -99,3 +99,9 @@ export const Title = styled.Text`
 export const TransactionsList = styled(FlatList).attrs({
   showsVerticalScrollIndicator: false,
 })`` as React.ComponentType as new <DataListProps>() => FlatList<DataListProps>;
+
+export const LoadContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
