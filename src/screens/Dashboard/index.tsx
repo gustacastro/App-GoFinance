@@ -11,6 +11,8 @@ import {
   TransactionCardProps,
 } from "../../Components/TransactionCard";
 
+import { useAuth } from "../../hooks/auth";
+
 import {
   Container,
   Header,
@@ -52,17 +54,26 @@ export function Dashboard() {
   );
 
   const theme = useTheme();
+  const { signOut, user } = useAuth();
 
   function getLastTransactionDate(
     collection: DataListProps[],
     type: "positive" | "negative"
   ) {
+    const collectionFilttered = collection.filter(
+      (transaction) => transaction.type === type
+    );
+
+    if (collectionFilttered.length === 0) {
+      return 0;
+    }
+
     const lastTransaction = new Date(
       Math.max.apply(
         Math,
-        transactions
-          .filter((transaction) => transaction.type === type)
-          .map((transaction) => new Date(transaction.date).getTime())
+        collectionFilttered.map((transaction) =>
+          new Date(transaction.date).getTime()
+        )
       )
     );
 
@@ -75,7 +86,7 @@ export function Dashboard() {
   }
 
   async function loadTransactions() {
-    const dataKey = "@gofinance:transactions";
+    const dataKey = `@gofinance:transactions_user:${user.id}`;
     const response = await AsyncStorage.getItem(dataKey);
     const transcations = response ? JSON.parse(response) : [];
 
@@ -90,7 +101,7 @@ export function Dashboard() {
           expensiveTotal += Number(item.amount);
         }
 
-        const amount = Number(item.amount).toLocaleString(`pt-BR`, {
+        const amount = Number(item.amount).toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         });
@@ -122,7 +133,11 @@ export function Dashboard() {
       transactions,
       "negative"
     );
-    const totalInterval = `01 a ${lastTransactionEntries}`;
+
+    const totalInterval =
+      lastTransactionEntries === 0
+        ? "Não há transações"
+        : `01 a ${lastTransactionEntries}`;
 
     const total = entriesTotal - expensiveTotal;
 
@@ -132,14 +147,20 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransaction: `Última entrada dia ${lastTransactionEntries}`,
+        lastTransaction:
+          lastTransactionEntries === 0
+            ? "Não há transações"
+            : `Última entrada dia ${lastTransactionEntries}`,
       },
       expensives: {
         amount: expensiveTotal.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransaction: `Última saída dia ${lastTransactionExpensives}`,
+        lastTransaction:
+          lastTransactionExpensives === 0
+            ? "Não há transação"
+            : `Última saída dia ${lastTransactionExpensives}`,
       },
       total: {
         amount: total.toLocaleString("pt-BR", {
@@ -152,6 +173,10 @@ export function Dashboard() {
 
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -172,18 +197,18 @@ export function Dashboard() {
               <UserInfo>
                 <Photo
                   source={{
-                    uri: "https://avatars.githubusercontent.com/u/82110597?v=4",
+                    uri: user.phote,
                   }}
                 />
 
                 <User>
                   <UserGretting>Olá,</UserGretting>
-                  <UserName>Gustavo</UserName>
+                  <UserName>{user.name}</UserName>
                 </User>
               </UserInfo>
 
               <GestureHandlerRootView>
-                <LogoutButton onPress={() => {}}>
+                <LogoutButton onPress={signOut}>
                   <Icon name='power' />
                 </LogoutButton>
               </GestureHandlerRootView>

@@ -1,6 +1,8 @@
 import "intl";
 import "intl/locale-data/jsonp/pt-BR";
 
+import { LogBox } from "react-native";
+
 import React from "react";
 import { StatusBar } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
@@ -15,11 +17,13 @@ import {
 
 import theme from "./src/global/styles/theme";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { Routes } from "./src/routes";
 
-import { AppRoutes } from "./src/routes/app.routes";
+import { AuthProvider, useAuth } from "./src/hooks/auth";
 
 export default function App() {
+  LogBox.ignoreLogs(["EventEmitter.removeListener"]);
+
   SplashScreen.preventAutoHideAsync();
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -27,7 +31,9 @@ export default function App() {
     Poppins_700Bold,
   });
 
-  if (!fontsLoaded) {
+  const { userStorageLoading } = useAuth();
+
+  if (!fontsLoaded || userStorageLoading) {
     return null;
   }
 
@@ -35,10 +41,11 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer>
-        <StatusBar barStyle='light-content' />
-        <AppRoutes />
-      </NavigationContainer>
+      <StatusBar barStyle='light-content' />
+
+      <AuthProvider>
+        <Routes />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
